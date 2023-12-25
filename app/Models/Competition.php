@@ -15,5 +15,4 @@ class Competition extends Model
       public function FootballMatch(){
         return $this->hasMany(FootballMatch::class,'competition_id')->withTrashed();
       }
-
 }

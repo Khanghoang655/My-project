@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -13,12 +14,14 @@ return new class extends Migration {
         Schema::create('football_matches', function (Blueprint $table) {
             $table->id();
             $table->integer('match_id')->nullable();
-            $table->string('home_team')->nullable();
-            $table->string('away_team')->nullable();
+            $table->string('home_team', 255)->nullable();
+            $table->string('away_team', 255)->nullable();
             $table->json('result')->nullable();
             $table->dateTime('date_time')->nullable();
             $table->timestamps();
         });
+
+        // Specify the character set and collation separately after creating the table
     }
 
     /**

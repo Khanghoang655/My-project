@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -18,14 +17,12 @@ return new class extends Migration
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
             $table->integer('current_matchday')->nullable();
-            $table->string('winner')->nullable();
+            $table->text('winner')->nullable();
             $table->timestamps();
         });
-        Schema::table('football_matches', function (Blueprint $table) {
-             //B1 : Create column FK
-             $table->unsignedBigInteger('competition_id');
-             //B2 : Create FK reference product_category (id)
-             $table->foreign('competition_id')->references('id')->on('competitions');
+        Schema::table('football_matches', function(Blueprint $table){
+            $table->unsignedBigInteger('competition_id');
+            $table->foreign('competition_id')->references('id')->on('competitions');
         });
     }
 
@@ -34,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('competition');
+        Schema::dropIfExists('competitions');
     }
 };

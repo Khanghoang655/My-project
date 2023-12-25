@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class MatchController extends Controller
 {
@@ -62,7 +63,9 @@ class MatchController extends Controller
             FootballMatch::create([
                 'match_id' => $match['id'],
                 'home_team' => $homeTeamName,
+                'emblem_home'=> $match['homeTeam']['crest'],
                 'away_team' => $awayTeamName,
+                'emblem_away'=> $match['awayTeam']['crest'],
                 'area_name' => $areaName,
                 'competition_name' => $competitionName,
                 'status' => 0,
@@ -139,19 +142,41 @@ private function hasRequiredFields(array $match, array $requiredFields)
         return response()->json(['slug' => $slug]);
     }
 
-    public function update(Request $request, string $id)
-    {
-        $matches = FootballMatch::where('match_id', $id)->firstOrFail();
 
-        $matches->update([
-            'home_team' => $request->home_team,
-            'away_team' => $request->away_team,
-            'home_name_slug' => Str::slug($request->home_team ?? ''),
-            'away_name_slug' => Str::slug($request->away_team ?? ''),
-        ]);
+public function update(Request $request, string $id)
+{
+    // Validate the request data
+    $request->validate([
+        'home_team' => 'required|string|max:255',
+        'away_team' => 'required|string|max:255',
+        'home_name_slug' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('football_matches')->ignore($id, 'match_id'),
+        ],
+        'away_name_slug' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('football_matches')->ignore($id, 'match_id'),
+        ],
+    ]);
 
-        return redirect()->route('admin.index')->with('msg', 'Update thanh cong');
-    }
+    // Find the match or throw a 404 exception
+    $matches = FootballMatch::where('match_id', $id)->firstOrFail();
+
+    // Update the match data
+    $matches->update([
+        'home_team' => $request->home_team,
+        'away_team' => $request->away_team,
+        'home_name_slug' => Str::slug($request->home_name_slug ?? ''),
+        'away_name_slug' => Str::slug($request->away_name_slug ?? ''),
+    ]);
+
+    return redirect()->route('admin.index')->with('msg', 'Cập nhật thành công');
+}
+
 
     public function detail($id)
     {

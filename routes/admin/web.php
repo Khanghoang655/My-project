@@ -14,12 +14,12 @@ Route::prefix('admin')->middleware('check.is.admin')->name('admin.')->group(func
     Route::get('matches/detail/{id}', [MatchController::class, 'detail'])->name('matches.detail');
 });
 Route::prefix('admin')->middleware('check.is.admin')->name('admin.')->group(function(){
-    Route::get('index', [CompetitionController::class, 'index'])->name('index');
-    Route::match(['get', 'post'], 'update-matches', [CompetitionController::class, 'updateMatch'])->name('update-matches');
-    Route::delete('matches/destroy/{id}', [CompetitionController::class, 'destroy'])->name('matches.destroy');
-    Route::post('matches/force-delete/{id}', [CompetitionController::class, 'forceDelete'])->name('matches.force.delete');
-    Route::post('matches/restore/{id}', [CompetitionController::class, 'restore'])->name('matches.restore');
-    Route::post('matches/update/{id}', [CompetitionController::class, 'update'])->name('matches.update');
-    Route::post('matches/slug/', [CompetitionController::class, 'createSlug'])->name('matches.createSlug');
-    Route::get('matches/detail/{id}', [CompetitionController::class, 'detail'])->name('matches.detail');
+    Route::get('competition', [CompetitionController::class, 'index'])->name('index');
+    Route::match(['get', 'post'], 'update-competiton', [CompetitionController::class, 'updateCompetition'])->name('update-competition');
+    Route::delete('competition/destroy/{id}', [CompetitionController::class, 'destroy'])->name('competition.destroy');
+    Route::post('competition/force-delete/{id}', [CompetitionController::class, 'forceDelete'])->name('competition.force.delete');
+    Route::post('competition/restore/{id}', [CompetitionController::class, 'restore'])->name('competition.restore');
+    Route::post('competition/update/{id}', [CompetitionController::class, 'update'])->name('competition.update');
+    Route::post('competition/slug/', [CompetitionController::class, 'createSlug'])->name('competition.createSlug');
+    Route::get('competition/detail/{id}', [CompetitionController::class, 'detail'])->name('competition.detail');
 });

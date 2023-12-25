@@ -12,7 +12,7 @@
                     </div>
                 @endif
 
-               
+
             </div><!-- /.container-fluid -->
         </div>
         <!-- /.content-header -->
@@ -28,11 +28,11 @@
                             </div>
                             <!-- /.card-header -->
                             <div class="card-body">
-                                <form method="POST" action="{{ route('admin.update-matches') }}">
+                                {{-- <form method="POST" action="{{ route('admin.update-competition') }}">
                                     @csrf
                                     <label for="competition">Select Competition:</label>
                                     <select name="competition" id="competition">
-                                        @foreach ($competitions as $competition)
+                                        @foreach ($competition as $competition)
                                             <option value="{{ $competition }}"
                                                 {{ $selectedCompetition == $competition ? 'selected' : '' }}>
                                                 {{ $competition }}
@@ -40,48 +40,51 @@
                                         @endforeach
                                     </select>
                                     <button type="submit">Filter</button>
-                                </form>
+                                </form> --}}
                                 <table class="table table-bordered" id="table-product">
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Match Id</th>
+                                            <th>Competition Id</th>
+                                            <th>Logo</th>
                                             <th>Name</th>
-                                            <th>Score</th>
-                                            <th>Date time</th>
+                                            <th>Winner</th>
+                                            <th>Start time</th>
+                                            <th>End time</th>
                                             <th>Created At</th>
                                             <th>Deleted At</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse ($matches as $index => $match)
+                                        @forelse ($competition as $index => $value)
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $match->match_id }}</td>
-                                                <td>{{ $match->home_team }} vs {{ $match->away_team }}</td>
-                                                <td>
+                                                <td class="text-center align-middle">{{ $loop->iteration }}</td>
+                                                <td class="text-center align-middle">{{ $value->id }}</td>
+                                                <td class="text-center align-middle"><img src="{{ $value->emblem }}"
+                                                        alt="Competition Emblem"></td>
+                                                <td class="text-center align-middle">{{ $value->name_of_competition }}
+                                                    ({{ $value->short_name }}) </td>
+                                                <td class="text-center align-middle">
                                                     @php
-                                                        $result = json_decode($match->result);
+                                                        $winner = json_decode($value->winner);
                                                     @endphp
-                                                    @if ($result)
-                                                        @if ($result->points_team1 !== null || $result->points_team2 !== null)
-                                                            {{ $result->points_team1 ?? 0 }} -
-                                                            {{ $result->points_team2 ?? 0 }}
-                                                        @else
-                                                            0 - 0
-                                                        @endif
+                                                    @if ($winner->name == null || $winner->crest == null)
+                                                        In progress
+                                                    @else
+                                                        {{ $winner->name }} <img  src="{{ $winner->crest }}">
                                                     @endif
                                                 </td>
-                                                <td>{{ $match->date_time }} UTC</td>
-                                                <td>{{ $match->created_at }}</td>
-                                                <td>{{ $match->deleted_at }}</td>
-                                                <td style="display: flex; gap: 8px;">
+                                                <td class="text-center align-middle">{{ $value->start_date }} UTC</td>
+                                                <td class="text-center align-middle">{{ $value->end_date }} UTC</td>
+                                                <td class="text-center align-middle">{{ $value->created_at }}</td>
+                                                <td class="text-center align-middle">{{ $value->deleted_at }}</td>
+                                                <td class="text-center align-middle" style="display: flex; gap: 8px;">
                                                     <a style="text-decoration: none;" class="btn btn-primary"
-                                                        href="{{ route('admin.matches.detail', ['id' => $match->match_id]) }}">Detail</a>
+                                                        href="{{ route('admin.competition.detail', ['id' => $value->id]) }}">Detail</a>
 
                                                     <form
-                                                        action="{{ route('admin.matches.destroy', ['id' => $match->match_id]) }}"
+                                                        action="{{ route('admin.competition.destroy', ['id' => $value->id]) }}"
                                                         method="POST">
                                                         @csrf
                                                         @method('delete')
@@ -90,9 +93,9 @@
                                                             style=" background-color: #dc3545; border-color: #dc3545;">Delete</button>
                                                     </form>
 
-                                                    @if ($match->trashed())
+                                                    {{-- @if ($value->trashed())
                                                         <form
-                                                            action="{{ route('admin.matches.restore', ['id' => $match->match_id]) }}"
+                                                            action="{{ route('admin.competition.restore', ['id' => $value->match_id]) }}"
                                                             method="POST">
                                                             @csrf
                                                             <button type="submit" class="btn btn-success"
@@ -100,19 +103,19 @@
                                                         </form>
 
                                                         <form
-                                                            action="{{ route('admin.matches.force.delete', ['id' => $match->match_id]) }}"
+                                                            action="{{ route('admin.competition.force.delete', ['id' => $value->match_id]) }}"
                                                             method="POST">
                                                             @csrf
                                                             <button type="submit" class="btn btn-warning"
                                                                 style=" background-color: #ffc107; border-color: #ffc107;">Force
                                                                 Delete</button>
                                                         </form>
-                                                    @endif
+                                                    @endif --}}
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4">No data</td>
+                                                <td class="text-center align-middle" colspan="4">No data</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -130,7 +133,7 @@
                                     @endfor
                                     <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
                                 </ul>
-                                {{-- {{ $matches->links() }} --}}
+                                {{-- {{ $valuees->links() }} --}}
                             </div>
 
 
@@ -138,7 +141,7 @@
                         <!-- /.card -->
                     </div>
                 </div>
-                <form action="{{ route('admin.update-matches') }}" method="POST">
+                <form action="{{ route('admin.update-competition') }}" method="POST">
                     @csrf
                     <button type="submit" class="btn btn-primary btn-lg">Update</button>
                 </form>
