@@ -19,7 +19,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('admin', function () {
-    return view('admin.sport.admin-sport');
+    return view('admin.admin');
 })->middleware(['auth', 'verified'])->name('admin-index');
 
 Route::middleware('auth')->group(function () {

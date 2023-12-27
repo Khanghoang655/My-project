@@ -59,6 +59,7 @@
 
         <!-- Page Content -->
         <main>
+            <a href="{{route('admin-index')}}" class="btn btn-primary btn-lg mx-3">Back to Admin Page</a>
             @yield('content')
         </main>
         @yield('js-custom')

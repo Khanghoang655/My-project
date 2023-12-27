@@ -61,11 +61,13 @@ class CompetitionController extends Controller
                         'end_date' => Carbon::parse($competition['currentSeason']['endDate']),
                         'current_matchday' => $competition['currentSeason']['currentMatchday'],
                         'winner' => json_encode($winner),
-                        'status' => 0
+                        'status' => 0,
                     ]);
                 } else {
                     $existingCompetition->update([
                         'winner' => json_encode($winner),
+                        'competition_id'=>$competition['id']
+
                     ]);
                     if (Carbon::parse($competition['currentSeason']['endDate'])->isToday()) {
                         $existingCompetition->update([

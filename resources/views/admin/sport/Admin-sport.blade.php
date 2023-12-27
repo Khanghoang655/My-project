@@ -12,7 +12,7 @@
                     </div>
                 @endif
 
-               
+
             </div><!-- /.container-fluid -->
         </div>
         <!-- /.content-header -->
@@ -28,27 +28,35 @@
                             </div>
                             <!-- /.card-header -->
                             <div class="card-body">
-                                <form method="POST" action="{{ route('admin.update-matches') }}">
+                                <form method="POST" action="{{ route('admin.update-matches') }}"
+                                    id="competition-filter-form">
                                     @csrf
                                     <label for="competition">Select Competition:</label>
                                     <select name="competition" id="competition">
+                                        <option value="all" {{ $selectedCompetition == 'all' ? 'selected' : '' }}>All
+                                        </option>
                                         @foreach ($competitions as $competition)
                                             <option value="{{ $competition }}"
-                                                {{ $selectedCompetition == $competition ? 'selected' : '' }}>
+                                                {{ $competition == $selectedCompetition ? 'selected' : '' }}>
                                                 {{ $competition }}
                                             </option>
                                         @endforeach
                                     </select>
                                     <button type="submit">Filter</button>
+                                    <button type="reset">Reset</button>
                                 </form>
+
                                 <table class="table table-bordered" id="table-product">
                                     <thead>
+                                        <tr><a href="{{ route('admin.matches.restorematch') }}" class="btn btn-primary">Thêm lại dữ liệu(nếu đã xóa vĩnh viễn)</a>
+                                        </tr>
                                         <tr>
                                             <th>#</th>
                                             <th>Match Id</th>
                                             <th>Name</th>
                                             <th>Score</th>
                                             <th>Date time</th>
+                                            <th>Competition</th>
                                             <th>Created At</th>
                                             <th>Deleted At</th>
                                             <th>Action</th>
@@ -59,8 +67,12 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $match->match_id }}</td>
-                                                <td>{{ $match->home_team }} vs {{ $match->away_team }}</td>
                                                 <td>
+                                                    {{ $match->home_team }} <img class="team-emblem" src="{{ $match->emblem_home }}" alt="">
+                                                    vs
+                                                    {{ $match->away_team }} <img class="team-emblem" src="{{ $match->emblem_away }}" alt="">
+                                                </td>
+                                                                                                <td>
                                                     @php
                                                         $result = json_decode($match->result);
                                                     @endphp
@@ -74,6 +86,7 @@
                                                     @endif
                                                 </td>
                                                 <td>{{ $match->date_time }} UTC</td>
+                                                <td>{{ $match->competition_name }}</td>
                                                 <td>{{ $match->created_at }}</td>
                                                 <td>{{ $match->deleted_at }}</td>
                                                 <td style="display: flex; gap: 8px;">
