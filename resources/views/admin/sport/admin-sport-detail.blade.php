@@ -13,6 +13,11 @@
                             </div>
                             <!-- /.card-header -->
                             <!-- form start -->
+                            @if (session('msg'))
+                            <div class="alert alert-success" role="alert">
+                                {{ session('msg') }}
+                            </div>
+                        @endif
                             {{ $errors ?? dd($errors->all()) }}
                             <form role="form" method="POST"
                                 action="{{ route('admin.matches.update', ['id' => $matches->match_id]) }}">

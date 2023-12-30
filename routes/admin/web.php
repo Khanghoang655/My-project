@@ -28,12 +28,9 @@ Route::prefix('admin')->middleware('check.is.admin')->name('admin.')->group(func
 Route::prefix('admin')->middleware('check.is.admin')->name('admin.')->group(function () {
     Route::get('seat/index', [SeatController::class, 'index'])->name('seat.index');
     Route::post('seat/store', [SeatController::class, 'store'])->name('seat.store');
+    Route::post('seat/force-delete/{id}/{area_name}', [SeatController::class, 'forceDelete'])->name('seat.force.delete');
 
-    // Route::match(['get', 'post'], 'update-competiton', [CompetitionController::class, 'updateCompetition'])->name('update-competition');
-    // Route::delete('competition/destroy/{id}', [CompetitionController::class, 'destroy'])->name('competition.destroy');
-    // Route::post('competition/force-delete/{id}', [CompetitionController::class, 'forceDelete'])->name('competition.force.delete');
-    // Route::post('competition/restore/{id}', [CompetitionController::class, 'restore'])->name('competition.restore');
-    // Route::post('competition/update/{id}', [CompetitionController::class, 'update'])->name('competition.update');
-    // Route::post('competition/slug/', [CompetitionController::class, 'createSlug'])->name('competition.createSlug');
-    // Route::get('competition/detail/{id}', [CompetitionController::class, 'detail'])->name('competition.detail');
+    Route::match(['get', 'post'],'seat/update/{id}/{area_name}', [SeatController::class, 'update'])->name('seat.update');
+    Route::match(['get', 'post'],'seat/detail/{id}/{area_name}', [SeatController::class, 'detail'])->name('seat.detail');
+
 });

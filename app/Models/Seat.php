@@ -10,12 +10,7 @@ class Seat extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $fillable = [
-        'area_id',
-        'seat_number',
-        'status',
-        'match_id',
-    ];
+    protected $guarded = [];
 
     public function footballMatch()
     {

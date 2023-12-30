@@ -37,9 +37,8 @@ class MatchController extends Controller
         if (!$responseMatches->successful()) {
             throw new \Exception('Failed to fetch match data from the API.');
         }
-
+        
         $matches = $responseMatches->json()['matches'] ?? [];
-
         foreach ($matches as $match) {
             $requiredFields = ['homeTeam', 'awayTeam', 'area', 'competition'];
 
@@ -52,14 +51,13 @@ class MatchController extends Controller
 
             // dd($isDeleted);
             // If the match is not deleted, add it back
-            if ($isDeleted) {
+            if (!$isDeleted) {
                 $result = [
                     'points_team1' => $match['score']['fullTime']['home'],
                     'points_team2' => $match['score']['fullTime']['away'],
                 ];
 
                 $competitionId = Competition::where('competition_id', $match['competition']['id'])->first();
-
                 FootballMatch::updateOrCreate(
                     ['match_id' => $match['id'], 'deleted_at' =>null],
                     [
@@ -73,7 +71,7 @@ class MatchController extends Controller
                         'seat' => 70000,
                         'result' => json_encode($result, JSON_UNESCAPED_SLASHES),
 
-                        'date_time' => Carbon::parse($match['utcDate'])->toDateTimeString(),
+                        'date_time' => Carbon::parse($match['utcDate'])->setTimezone('Asia/Ho_Chi_Minh')->format('Y-m-d H:i:s'),
                         'competition_id' => $competitionId->id,
                     ]
                 );
