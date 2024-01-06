@@ -31,24 +31,25 @@
                                 <form method="POST" action="{{ route('admin.update-matches') }}"
                                     id="competition-filter-form">
                                     @csrf
-                                    <label for="competition">Select Competition:</label>
-                                    <select name="competition" id="competition">
+                                    <label for="competition" style="color: black;">Select Competition:</label>
+                                    <select name="competition" id="competition" style="color: black;">
                                         <option value="all" {{ $selectedCompetition == 'all' ? 'selected' : '' }}>All
                                         </option>
                                         @foreach ($competitions as $competition)
                                             <option value="{{ $competition }}"
-                                                {{ $competition == $selectedCompetition ? 'selected' : '' }}>
+                                                {{ $competition == $selectedCompetition ? 'selected' : '' }}
+                                                style="color: black;">
                                                 {{ $competition }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    <button type="submit">Filter</button>
-                                    <button type="reset">Reset</button>
+                                    <button type="submit" class="btn btn-success" style="color: white; background-color: green">Filter</button>
+                                    <button type="reset" class="btn btn-danger" style="color: white; background-color: rgb(128, 0, 0)">Reset</button>
                                 </form>
-
                                 <table class="table table-bordered" id="table-product">
                                     <thead>
-                                        <tr><a href="{{ route('admin.matches.restorematch') }}" class="btn btn-primary">Thêm lại dữ liệu(nếu đã xóa vĩnh viễn)</a>
+                                        <tr><a href="{{ route('admin.matches.restorematch') }}" class="btn btn-primary">Thêm
+                                                lại dữ liệu(nếu đã xóa vĩnh viễn)</a>
                                         </tr>
                                         <tr>
                                             <th>#</th>
@@ -68,11 +69,13 @@
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $match->match_id }}</td>
                                                 <td>
-                                                    {{ $match->home_team }} <img class="team-emblem" src="{{ $match->emblem_home }}" alt="">
+                                                    {{ $match->home_team }} <img class="team-emblem"
+                                                        src="{{ $match->emblem_home }}" alt="">
                                                     vs
-                                                    {{ $match->away_team }} <img class="team-emblem" src="{{ $match->emblem_away }}" alt="">
+                                                    {{ $match->away_team }} <img class="team-emblem"
+                                                        src="{{ $match->emblem_away }}" alt="">
                                                 </td>
-                                                                                                <td>
+                                                <td>
                                                     @php
                                                         $result = json_decode($match->result);
                                                     @endphp

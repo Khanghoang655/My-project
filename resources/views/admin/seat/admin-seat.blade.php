@@ -72,6 +72,8 @@
                         <th scope="col">Date Time</th>
                         <th scope="col">Current Time</th>
                         <th scope="col">Area Name</th>
+                        <th scope="col">Total Seat</th>
+                        <th scope="col">Sold Seat</th>
                         <th scope="col">Actions</th>
                     </tr>
                 </thead>
@@ -91,6 +93,8 @@
                                         <small>{{ $seat->seat_number }}</small>
                                     @endforeach
                                 </td>
+                                <td>{{$match->seat}}</td>
+                                <td>{{$match->seats_remaining}}</td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         @if (!$match->seats->isEmpty())

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateRequest;
 use App\Models\Competition;
 use App\Models\FootballMatch;
+use App\Models\Seat;
 use App\Notifications\SmsCustomer;
 use Http;
 use Illuminate\Http\Request;
@@ -58,7 +59,8 @@ class MatchController extends Controller
                 ];
 
                 $competitionId = Competition::where('competition_id', $match['competition']['id'])->first();
-                FootballMatch::updateOrCreate(
+
+               $footballMatch= FootballMatch::updateOrCreate(
                     ['match_id' => $match['id'], 'deleted_at' =>null],
                     [
                         'home_team' => $match['homeTeam']['name'],
@@ -66,15 +68,18 @@ class MatchController extends Controller
                         'away_team' => $match['awayTeam']['name'],
                         'emblem_away' => $match['awayTeam']['crest'],
                         'area_name' => $match['area']['name'],
-                        'competition_name' => $match['competition']['name'],
+                        'competition_name' => $match['competition']['name'] ?? null,
                         'status' => 0,
-                        'seat' => 70000,
+                        'seat'=>0,
                         'result' => json_encode($result, JSON_UNESCAPED_SLASHES),
 
                         'date_time' => Carbon::parse($match['utcDate'])->setTimezone('Asia/Ho_Chi_Minh')->format('Y-m-d H:i:s'),
                         'competition_id' => $competitionId->id,
                     ]
                 );
+                $totalSeat = Seat::where('match_id', $footballMatch->id)->value('total_seat') ?? 0;
+                $footballMatch->seat =  $totalSeat;
+                $footballMatch->save();
             }
         }
 

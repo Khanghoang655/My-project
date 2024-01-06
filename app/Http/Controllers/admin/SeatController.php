@@ -1,72 +1,104 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\FootballMatch;
 use App\Models\Seat;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\DB;
 
 class SeatController extends Controller
 {
     public function index()
     {
         $matches = FootballMatch::withTrashed()->with('seats')->get();
-
         return view('admin.seat.admin-seat', compact('matches'));
     }
+
     public function store(Request $request)
     {
-        // Kiểm tra số ghế đã đủ hay chưa
+        $seatsSold = $this->calculateSoldSeats($request->match_id);
 
-        $seatsRemaining = $this->calculateRemainingSeats($request->match_id);
-        if ($seatsRemaining < $request->seat_number) {
-            return redirect()->route('admin.seat.index')->with('msg', "Số ghế quá lớn hoặc Số ghế quá đã đủ vui lòng nhập lại");
-        }
-
-        // Kiểm tra dữ liệu nhập vào và validate theo các quy tắc
+        // Validate input data
         $request->validate([
+            'status'=>'required|in:available,unavailable',
             'seat_number' => 'required|numeric|min:1000|integer',
-            'status' => 'required|in:available,unavailable',
             'match_id' => 'required|exists:football_matches,id',
         ]);
 
-        // Tạo hoặc cập nhật bản ghi Seat mới với dữ liệu đã được validate
+        
         try {
+            // Create or update Seat record
             $seat = Seat::updateOrCreate(
                 ['area_name' => $request->area_name, 'match_id' => $request->match_id],
                 [
                     'area_name' => $request->area_name,
-                    'seat_number' => DB::raw('seat_number + ' . $request->seat_number),
-                    'status' => $request->status,
+                    // 'seat_number' => $request->seat_number,
+                    'status'=>'anvailable',
                     'match_id' => $request->match_id,
                 ]
             );
 
-            // Check if decrementing by requested seat number would result in a negative value
-            $remainingAfterDecrement = max(0, $seatsRemaining - $request->seat_number);
+            // Update seats_remaining based on seat status
+            if ($request->status === 'unavailable') {
+                // dd("if ($seat->area_name === $request->area_name && $seat->seat_number >= $request->seat_number && $seat->match_id === $request->match_id)");
+                if ($seat->area_name === $request->area_name && $seat->seat_number >= $request->seat_number && $seat->match_id === $request->match_id) {
+                    // dd("$seat->seat_number ");
+    
+                    $seat->seat_number -= $request->seat_number;
+                    $seat->footballMatch->seats_remaining += $request->seat_number;
+                    $seat->footballMatch->save();
+                    $seat->save();
+                }
+                else{
+                    return redirect()->route('admin.seat.index', $seat->id)->with('msg', "Tạo không thành công.");
+                }
+               
+            }
+            else{
+                $seat->seat_number = $request->seat_number;
+                $seat->save();
+            }
 
-            FootballMatch::where('id', $request->match_id)->update(['seats_remaining' => $remainingAfterDecrement]);
+            // Update total_seat for the FootballMatch
+            $totalSeat = Seat::where('match_id', $request->match_id)->sum('seat_number') ?? 0;
+            $seat->total_seat = $totalSeat;
+            $seat->save();
+            FootballMatch::where('id', $request->match_id)->update(['seat' => $totalSeat]);
 
         } catch (\Exception $e) {
             dd($e->getMessage());
         }
 
-        // Hiển thị thông điệp
-        if ($remainingAfterDecrement === 0) {
-            return redirect()->route('admin.seat.index', $seat->id)->with('msg', "Đã đủ số ghế. Số ghế còn lại: 0");
-        } else {
-            return redirect()->route('admin.seat.index', $seat->id)->with('msg', "Tạo thành công. Số ghế còn lại: $remainingAfterDecrement");
-        }
+        return redirect()->route('admin.seat.index', $seat->id)->with('msg', "Tạo thành công.");
     }
+
 
     public function forceDelete($id, $area_name)
     {
-        Seat::where('match_id', $id)->where('area_name', $area_name)->forceDelete();
-        return view('admin.seat.admin-seat')->with('msg', "Xóa khu vực $area_name thành công ");
+        $seat = Seat::where('match_id', $id)->where('area_name', $area_name)->first();
+
+        if ($seat) {
+
+            // Xóa ghế
+            $seat->forceDelete();
+
+            // Cập nhật total_seat trong FootballMatch
+            $match = FootballMatch::find($id);  // Lấy đối tượng trận đấu
+            $match->update(['seat' => 0, 'seats_remaining' => 0]);
+
+            $matches = FootballMatch::withTrashed()->with('seats')->get();
+
+            return view('admin.seat.admin-seat', [
+                'matches' => $matches,
+                'msg' => "Xóa khu vực $area_name thành công",
+            ]);
+        }
+
+        return redirect()->route('admin.seat.index')->with('msg', "Seat not found");
     }
+
+
     public function detail($id, $area_name)
     {
         $seat = Seat::with('footballMatch')->where('match_id', $id)->where('area_name', $area_name)->firstOrFail();
@@ -75,24 +107,20 @@ class SeatController extends Controller
             'seat' => $seat,
             'area_name' => $area_name
         ]);
-
     }
+
     public function update($id, $area_name, Request $request)
     {
-        // Find the seat
         $seat = Seat::where('match_id', $id)->where('area_name', $area_name)->firstOrFail();
 
-        // Kiểm tra dữ liệu nhập vào và validate theo các quy tắc
         $request->validate([
             'seat_number' => 'required|numeric|min:1000|integer',
             'status' => 'required|in:available,unavailable',
             'match_id' => 'required|exists:football_matches,id',
         ]);
 
-        // Calculate remaining seats after validation
         $seatsRemaining = $this->calculateRemainingSeats($request->match_id);
 
-        // Check if remaining seats are sufficient
         if ($seatsRemaining < $request->seat_number) {
             return view('admin.seat.admin-seat-update', [
                 'msg' => "Số ghế quá lớn hoặc Số ghế quá đã đủ vui lòng nhập lại",
@@ -102,18 +130,15 @@ class SeatController extends Controller
             ]);
         }
 
-        // Update the seat
         $seat->update([
-            'area_name' =>$request->area_name,
+            'area_name' => $request->area_name,
             'seat_number' => $request->seat_number,
             'status' => $request->status,
         ]);
 
-        // Update the remaining seats
         $remainingAfterDecrement = max(0, $seatsRemaining - $request->seat_number);
         FootballMatch::where('id', $request->match_id)->update(['seats_remaining' => $remainingAfterDecrement]);
 
-        // Hiển thị thông điệp
         return view('admin.seat.admin-seat-update', [
             'msg' => "Tạo thành công. Số ghế còn lại: $remainingAfterDecrement",
             'id' => $id,
@@ -122,23 +147,29 @@ class SeatController extends Controller
         ]);
     }
 
+    protected function calculateSoldSeats($matchId)
+    {
+        $match = FootballMatch::find($matchId);
+
+        if ($match) {
+            $totalSeats = $match->total_seat;
+            $soldSeats = Seat::where('match_id', $matchId)->where('status', 'unavailable')->sum('seat_number');
+            return $soldSeats;
+        }
+
+        return 0;
+    }
 
     protected function calculateRemainingSeats($matchId)
     {
-        // Lấy thông tin về trận đấu và mối quan hệ với seats
         $match = FootballMatch::find($matchId);
 
-        // Kiểm tra xem có thông tin trận đấu không
         if ($match) {
-            // Lấy tổng số ghế và tổng số ghế đã sử dụng
-            $totalSeats = $match->seat;
-            $usedSeats = Seat::where('match_id', $matchId)->sum('seat_number');
-
-            // Tính toán số ghế còn lại
-            return $totalSeats - $usedSeats;
+            $totalSeats = $match->total_seat;
+            $soldSeats = Seat::where('match_id', $matchId)->where('status', 'unavailable')->sum('seat_number');
+            return max(0, $totalSeats - $soldSeats);
         }
 
-        // Trả về giá trị mặc định nếu không có thông tin
         return 0;
     }
 }
