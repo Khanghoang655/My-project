@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\ClubController;
 use App\Http\Controllers\admin\MatchController;
 use App\Http\Controllers\admin\CompetitionController;
 use App\Http\Controllers\admin\SeatController;
@@ -33,8 +34,12 @@ Route::prefix('admin')->middleware('check.is.admin')->name('admin.')->group(func
 
     Route::match(['get', 'post'],'seat/update/{id}/{area_name}', [SeatController::class, 'update'])->name('seat.update');
     Route::match(['get', 'post'],'seat/detail/{id}/{area_name}', [SeatController::class, 'detail'])->name('seat.detail');
+    Route::get('club/index',[ClubController::class,'index'])->name('club.index');
 
+    Route::match(['get', 'post'],'club/index/filter/{competitionId?}', [ClubController::class, 'filter'])->name('club.filter');
 });
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
+  // Club routes
+ 

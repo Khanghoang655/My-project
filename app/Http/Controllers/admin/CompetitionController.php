@@ -7,7 +7,9 @@ use App\Models\Competition;
 use Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\File;
 
 class CompetitionController extends Controller
 {
@@ -63,10 +65,12 @@ class CompetitionController extends Controller
                         'winner' => json_encode($winner),
                         'status' => 0,
                     ]);
+                    $this->addImagesToCompetition($existingCompetition, $competition['id']);
+
                 } else {
                     $existingCompetition->update([
                         'winner' => json_encode($winner),
-                        'competition_id'=>$competition['id']
+                        'competition_id' => $competition['id'],
 
                     ]);
                     if (Carbon::parse($competition['currentSeason']['endDate'])->isToday()) {
@@ -74,6 +78,7 @@ class CompetitionController extends Controller
                             'status' => 1,
                         ]);
                     }
+                    $this->addImagesToCompetition($existingCompetition, $competition['id']);
                 }
             }
         }
@@ -93,6 +98,41 @@ class CompetitionController extends Controller
         $missingFields = array_diff($requiredFields, array_keys($competition));
         return empty($missingFields);
     }
+    private function addImagesToCompetition($competition, $competitionId)
+    {
+        // Đường dẫn đến thư mục chứa ảnh
+        $imageDirectory = public_path("img/competitions/$competitionId");
+
+        // Kiểm tra xem thư mục có tồn tại không
+        if (File::isDirectory($imageDirectory)) {
+            // Lấy danh sách tất cả các tệp trong thư mục
+            $imageFiles = File::files($imageDirectory);
+
+            // Lấy dữ liệu JSON hiện tại từ cột 'images'
+            $currentImages = json_decode($competition->images, true) ?? [];
+
+            // Lặp qua từng tệp và thêm vào mảng 'images'
+            foreach ($imageFiles as $imageFile) {
+                $imageName = pathinfo($imageFile, PATHINFO_FILENAME);
+                $imageExtension = $imageFile->getExtension(); // Lấy định dạng của ảnh
+
+                // Tạo chuỗi có cả tên và định dạng của ảnh
+                $imageFullName = $imageName . '.' . $imageExtension;
+
+                // Kiểm tra xem tên và định dạng của ảnh đã tồn tại trong mảng 'images' chưa
+                if (!in_array($imageFullName, $currentImages)) {
+                    // Thêm tên và định dạng của ảnh vào mảng 'images'
+                    $currentImages[] = $imageFullName;
+                }
+            }
+
+            // Cập nhật cột 'images' với mảng mới
+            $competition->update([
+                'images' => json_encode($currentImages),
+            ]);
+        }
+    }
+
     public function destroy($id)
     {
         $competition = Competition::find($id);
@@ -106,25 +146,26 @@ class CompetitionController extends Controller
     }
     public function detail($id)
     {
-        $competition = Competition::where('id', $id)->firstOrFail();
-        return view('admin.competition.admin-competition-detail')->with('competition', $competition);
+        $competition = Competition::find($id);
+
+        return redirect()->route('admin.club.filter', ['competitionId' => $competition['id']]);
     }
     public function update(Request $request, string $id)
     {
         // Validate the request data
         $request->validate([
             'name_of_competition' => [
-            'required',
-            'string',
-            'max:255',
-            Rule::unique('competition')->ignore($id,'id'),
-        ],
-        'short_name' => [
-            'required',
-            'string',
-            'max:255',
-            Rule::unique('competition')->ignore($id,'id'),
-        ],
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('competition')->ignore($id, 'id'),
+            ],
+            'short_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('competition')->ignore($id, 'id'),
+            ],
             'start_date' => [
                 'required',
                 'date_format:Y-m-d',

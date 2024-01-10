@@ -29,19 +29,6 @@
                             </div>
                             <!-- /.card-header -->
                             <div class="card-body">
-                                {{-- <form method="POST" action="{{ route('admin.update-competition') }}">
-                                    @csrf
-                                    <label for="competition">Select Competition:</label>
-                                    <select name="competition" id="competition">
-                                        @foreach ($competition as $competition)
-                                            <option value="{{ $competition }}"
-                                                {{ $selectedCompetition == $competition ? 'selected' : '' }}>
-                                                {{ $competition }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <button type="submit">Filter</button>
-                                </form> --}}
                                 <table class="table table-bordered" id="table-product">
                                     <thead>
                                         <tr>
@@ -82,7 +69,7 @@
                                                 <td class="text-center align-middle">{{ $value->deleted_at }}</td>
                                                 <td class="text-center align-middle" style="display: flex; gap: 8px;">
                                                     <a style="text-decoration: none;" class="btn btn-primary"
-                                                        href="{{ route('admin.competition.detail', ['id' => $value->id]) }}">Detail</a>
+                                                        href="{{ route('admin.competition.detail',['id' => $value->id])}}">Detail</a>
 
                                                     <form
                                                         action="{{ route('admin.competition.destroy', ['id' => $value->id]) }}"

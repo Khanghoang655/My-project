@@ -42,7 +42,7 @@
                     <td>
                         <select name="match_id" required style="width: 100%; padding: 5px;">
                             <option value="{{ $seat->match_id }}">
-                                {{ $seat->footballMatch->home_team }} vs {{ $seat->footballMatch    ->away_team }}
+                                {{ $seat->footballMatch->home_team }} vs {{ $seat->footballMatch->away_team }}
 
                             </option>
                         </select>

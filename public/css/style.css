@@ -839,7 +839,7 @@ input[type=submit] {
 }
 
 .c-thumb img {
-    width: 100%;
+    width: 50%;
     -webkit-transition: all ease .3s;
     transition: all ease .3s
 }
@@ -3567,11 +3567,19 @@ input[type=submit] {
 .ticket-search-form .form-group input::placeholder {
     color: #90a5e8
 }
+.list-group-item {
+    cursor: pointer;
+    width: inherit;
+}
 
+.list-group-item:hover {
+    background-color: #f0f0f0; /* Change background color on hover */
+}
 .ticket-search-form .form-group button {
     outline: none;
     background: 0 0;
     border: none;
+    border-radius: 10px;
     color: #90a5e8;
     height: 45px;
     width: 45px;
@@ -3624,7 +3632,8 @@ input[type=submit] {
 }
 
 .ticket-search-form .form-group.large {
-    width: 270px
+    width: 100%;
+    border-radius: 0.5;
 }
 
 .ticket-search-form .form-group .filter-btn {
@@ -4029,7 +4038,7 @@ input[type=submit] {
 
 .cast-item .cast-thumb a {
     display: block;
-    border: 4px solid #31d7a9;
+    /* border: 4px solid #31d7a9; */
     padding: 6px;
     border-radius: 14px
 }

@@ -263,7 +263,7 @@
     </main>
 
     @yield('js-custom')
-
+    @include('client.layout.footer')
 </body>
 
 </html>
